@@ -1,0 +1,151 @@
+/* Built into the Zero theme's CSS while Zero_MegaMenu is enabled. */
+@source "../templates/**/*.phtml";
+
+/*
+ * The full-width panel. It is the theme's `.submenu` (a dropdown) of a
+ * `li.level0.has-mega-panel`, so it shows on the same :hover / :focus-within
+ * rules; what changes: the li is `position: static` so the panel spans the
+ * whole `.navigation`, and inside it the groups sit in columns with the
+ * promo card on the end. Below desktop the panel is the mobile accordion's
+ * content, stacked, without the promo.
+ */
+@layer components {
+    .mega-panel-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    @media (max-width: 63.99rem) {
+        .navigation .submenu.mega-panel {
+            padding-inline-start: 1rem;
+            border-top: 1px solid var(--color-base-300);
+        }
+
+        .mega-panel-heading {
+            display: block;
+            padding: 0.75rem 2.75rem 0.75rem 1rem;
+            font-size: var(--text-label);
+            font-weight: 600;
+        }
+
+        .mega-panel-list a {
+            display: block;
+            padding: 0.5rem 2.75rem 0.5rem 2rem;
+            font-size: var(--text-label);
+        }
+
+        .mega-panel-promo {
+            display: none;
+        }
+    }
+
+    @media (min-width: 64rem) {
+        .navigation.has-mega-nav {
+            position: relative;
+        }
+
+        .navigation li.level0.has-mega-panel {
+            position: static;
+        }
+
+        .navigation li.level0 .submenu.mega-panel {
+            position: absolute;
+            top: 100%;
+            inset-inline: 0;
+            z-index: 30;
+            width: 100%;
+            min-width: 0;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 2rem;
+            padding: 1.5rem 1.75rem;
+        }
+
+        .mega-panel-columns {
+            display: grid;
+            gap: 1.5rem 2rem;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .mega-panel-cols-2 .mega-panel-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .mega-panel-cols-3 .mega-panel-columns { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .mega-panel-cols-4 .mega-panel-columns { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+        .navigation .mega-panel-columns ul {
+            display: block;
+        }
+
+        .navigation li.level0 .mega-panel a.mega-panel-heading,
+        .mega-panel-heading {
+            display: block;
+            padding: 0 0 0.5rem;
+            font-size: var(--text-label);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--color-base-content);
+        }
+
+        .navigation li.level0 .mega-panel a.mega-panel-heading:hover {
+            background: none;
+            color: var(--color-secondary);
+        }
+
+        .navigation li.level0 .mega-panel .mega-panel-list a {
+            padding: 0.25rem 0;
+            border-radius: 0;
+            color: color-mix(in oklch, var(--color-base-content) 75%, transparent);
+        }
+
+        .navigation li.level0 .mega-panel .mega-panel-list a:hover {
+            background: none;
+            color: var(--color-secondary);
+        }
+
+        .mega-panel-promo {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex: none;
+            width: 18rem;
+            padding: 0;
+            border-radius: var(--radius-field, 0.5rem);
+            overflow: hidden;
+            background: var(--color-base-200);
+        }
+
+        .navigation li.level0 .mega-panel a.mega-panel-promo:hover {
+            background: var(--color-base-200);
+            color: inherit;
+        }
+
+        .mega-panel-promo img {
+            display: block;
+            width: 100%;
+            aspect-ratio: 3 / 2;
+            object-fit: cover;
+        }
+
+        .mega-panel-promo-heading {
+            display: block;
+            padding: 0.5rem 1rem 0;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .mega-panel-promo-text {
+            display: block;
+            padding: 0 1rem;
+            font-size: var(--text-label);
+            color: color-mix(in oklch, var(--color-base-content) 70%, transparent);
+        }
+
+        .mega-panel-promo-button {
+            margin: 0.25rem 1rem 1rem;
+            align-self: flex-start;
+        }
+    }
+}

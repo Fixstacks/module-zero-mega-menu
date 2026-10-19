@@ -1,0 +1,83 @@
+<?php
+/**
+ * Copyright © 2026 Roman Pasichnyk
+ * SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+ *
+ * Content > Mega Menu: the departments (top-level categories) with their
+ * panel, and the menu's own links.
+ *
+ * @var \Magento\Backend\Block\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+/** @var \Zero\MegaMenu\ViewModel\Admin $admin */
+$admin = $block->getData('view_model');
+$links = $admin->links();
+?>
+<h2 class="admin__legend"><?= $escaper->escapeHtml(__('Departments')) ?></h2>
+<p><?= $escaper->escapeHtml(__('The top-level categories of the menu. A department without a panel opens the plain dropdown of its subcategories.')) ?></p>
+<table class="data-grid zero-megamenu-departments" style="margin-bottom: 30px;">
+    <thead>
+        <tr>
+            <th class="data-grid-th"><?= $escaper->escapeHtml(__('Category')) ?></th>
+            <th class="data-grid-th"><?= $escaper->escapeHtml(__('Store')) ?></th>
+            <th class="data-grid-th"><?= $escaper->escapeHtml(__('In Menu')) ?></th>
+            <th class="data-grid-th"><?= $escaper->escapeHtml(__('Panel')) ?></th>
+            <th class="data-grid-th"><?= $escaper->escapeHtml(__('Promo')) ?></th>
+            <th class="data-grid-th"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($admin->departments() as $department) : ?>
+            <?php $panel = $department['panel']; ?>
+            <tr>
+                <td><?= $escaper->escapeHtml($department['name']) ?></td>
+                <td><?= $escaper->escapeHtml($department['store']) ?></td>
+                <td><?= $escaper->escapeHtml($department['in_menu'] ? __('Yes') : __('No')) ?></td>
+                <td><?= $escaper->escapeHtml($panel && $panel['is_active'] && $panel['is_mega'] ? __('Full width, %1 columns', $panel['columns']) : __('Dropdown')) ?></td>
+                <td><?= $escaper->escapeHtml($panel && ($panel['promo_image'] !== '' || $panel['promo_heading'] !== '') ? __('Yes') : '—') ?></td>
+                <td>
+                    <?php if ($panel) : ?>
+                        <a href="<?= $escaper->escapeUrl($admin->url('zero_megamenu/menu/edit', ['id' => $panel['menu_id']])) ?>"><?= $escaper->escapeHtml(__('Edit')) ?></a>
+                    <?php else : ?>
+                        <a href="<?= $escaper->escapeUrl($admin->url('zero_megamenu/menu/edit', ['category' => $department['id']])) ?>"><?= $escaper->escapeHtml(__('Add a panel')) ?></a>
+                    <?php endif; ?>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
+
+<h2 class="admin__legend"><?= $escaper->escapeHtml(__('Links of the menu')) ?></h2>
+<p>
+    <?= $escaper->escapeHtml(__('Links next to the categories: a page, the blog, the brands.')) ?>
+    <a class="action-secondary" href="<?= $escaper->escapeUrl($admin->url('zero_megamenu/menu/edit')) ?>" style="margin-left: 10px;"><?= $escaper->escapeHtml(__('Add a Link')) ?></a>
+</p>
+<table class="data-grid zero-megamenu-links">
+    <thead>
+        <tr>
+            <th class="data-grid-th"><?= $escaper->escapeHtml(__('Label')) ?></th>
+            <th class="data-grid-th"><?= $escaper->escapeHtml(__('URL')) ?></th>
+            <th class="data-grid-th"><?= $escaper->escapeHtml(__('Store View')) ?></th>
+            <th class="data-grid-th"><?= $escaper->escapeHtml(__('Placement')) ?></th>
+            <th class="data-grid-th"><?= $escaper->escapeHtml(__('Position')) ?></th>
+            <th class="data-grid-th"><?= $escaper->escapeHtml(__('Active')) ?></th>
+            <th class="data-grid-th"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($links as $link) : ?>
+            <tr>
+                <td><?= $escaper->escapeHtml($link['label']) ?></td>
+                <td><?= $escaper->escapeHtml($link['url']) ?></td>
+                <td><?= $escaper->escapeHtml($admin->storeViewLabel($link['store_id'])) ?></td>
+                <td><?= $escaper->escapeHtml($link['placement'] === 'before' ? __('Before the categories') : __('After the categories')) ?></td>
+                <td><?= (int) $link['position'] ?></td>
+                <td><?= $escaper->escapeHtml($link['is_active'] ? __('Yes') : __('No')) ?></td>
+                <td><a href="<?= $escaper->escapeUrl($admin->url('zero_megamenu/menu/edit', ['id' => $link['menu_id']])) ?>"><?= $escaper->escapeHtml(__('Edit')) ?></a></td>
+            </tr>
+        <?php endforeach; ?>
+        <?php if (!$links) : ?>
+            <tr><td colspan="7"><?= $escaper->escapeHtml(__('No links yet.')) ?></td></tr>
+        <?php endif; ?>
+    </tbody>
+</table>

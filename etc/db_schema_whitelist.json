@@ -1,0 +1,29 @@
+{
+    "zero_megamenu": {
+        "column": {
+            "menu_id": true,
+            "category_id": true,
+            "label": true,
+            "url": true,
+            "position": true,
+            "placement": true,
+            "store_id": true,
+            "is_active": true,
+            "is_mega": true,
+            "columns": true,
+            "depth": true,
+            "links": true,
+            "links_heading": true,
+            "promo_image": true,
+            "promo_heading": true,
+            "promo_text": true,
+            "promo_url": true,
+            "promo_button": true,
+            "updated_at": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "ZERO_MEGAMENU_CATEGORY_ID": true
+        }
+    }
+}

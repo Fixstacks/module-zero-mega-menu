@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!--
+    Copyright © 2026 Roman Pasichnyk
+    SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+
+    One row per department with a panel (category_id set) or per link of the
+    menu's own (category_id null: label, url, position, placement).
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="zero_megamenu" resource="default" engine="innodb" comment="Zero Mega Menu">
+        <column xsi:type="int" name="menu_id" unsigned="true" nullable="false" identity="true" comment="Menu ID"/>
+        <column xsi:type="int" name="category_id" unsigned="true" nullable="true" comment="Category ID (a department's panel)"/>
+        <column xsi:type="varchar" name="label" length="255" nullable="true" comment="Label (a link)"/>
+        <column xsi:type="varchar" name="url" length="1024" nullable="true" comment="URL (a link)"/>
+        <column xsi:type="smallint" name="position" unsigned="true" nullable="false" default="0" comment="Position (a link)"/>
+        <column xsi:type="varchar" name="placement" length="10" nullable="false" default="after" comment="Before or after the categories (a link)"/>
+        <column xsi:type="smallint" name="store_id" unsigned="true" nullable="false" default="0" comment="Store view it is for (0: all store views)"/>
+        <column xsi:type="smallint" name="is_active" unsigned="true" nullable="false" default="1" comment="Active"/>
+        <column xsi:type="smallint" name="is_mega" unsigned="true" nullable="false" default="1" comment="Full-Width Panel"/>
+        <column xsi:type="smallint" name="columns" unsigned="true" nullable="false" default="3" comment="Columns"/>
+        <column xsi:type="smallint" name="depth" unsigned="true" nullable="false" default="2" comment="Subcategory Levels"/>
+        <column xsi:type="text" name="links" nullable="true" comment="Extra Links (Label | URL per line)"/>
+        <column xsi:type="varchar" name="links_heading" length="255" nullable="true" comment="Extra Links Heading"/>
+        <column xsi:type="varchar" name="promo_image" length="255" nullable="true" comment="Promo Image"/>
+        <column xsi:type="varchar" name="promo_heading" length="255" nullable="true" comment="Promo Heading"/>
+        <column xsi:type="text" name="promo_text" nullable="true" comment="Promo Text"/>
+        <column xsi:type="varchar" name="promo_url" length="1024" nullable="true" comment="Promo URL"/>
+        <column xsi:type="varchar" name="promo_button" length="255" nullable="true" comment="Promo Button"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated At"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="menu_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="ZERO_MEGAMENU_CATEGORY_ID">
+            <column name="category_id"/>
+        </constraint>
+    </table>
+</schema>

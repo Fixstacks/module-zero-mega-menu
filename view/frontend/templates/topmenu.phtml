@@ -1,0 +1,135 @@
+<?php
+/**
+ * Copyright © 2026 Roman Pasichnyk
+ * SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+ *
+ * The category menu with the mega menu: the theme's markup (a link plus a
+ * sibling <details class="menu-toggle"> per node with children, so phones
+ * get an accordion and desktops open on :hover / :focus-within), where a
+ * department with a panel gets a full-width <div class="submenu mega-panel">
+ * instead of the dropdown list: its subcategories in columns, extra links,
+ * a promo card. The menu's own links come before or after the categories.
+ * No JavaScript: the panel is CSS, like the dropdowns.
+ *
+ * @var \Magento\Theme\Block\Html\Topmenu $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+/** @var \Zero\MegaMenu\ViewModel\Storefront $megamenu */
+$megamenu = $block->getData('megamenu');
+// Populates $block->getMenu() as a side effect: Catalog's plugin on getHtml() fills the tree.
+$block->getHtml('level-top', 'submenu', 0);
+
+$renderLink = static function (string $label, string $url) use ($escaper): void {
+    ?>
+    <li class="level0 menu-link">
+        <a href="<?= $escaper->escapeUrl($url) ?>"><span><?= $escaper->escapeHtml($label) ?></span></a>
+    </li>
+    <?php
+};
+
+$renderMenuItems = function ($items, int $level) use (&$renderMenuItems, $escaper, $megamenu): void {
+    /** @var \Magento\Framework\Data\Tree\Node $item */
+    foreach ($items as $item) {
+        $hasChildren = $item->hasChildren();
+        $panel = $level === 0 ? $megamenu->panel((string) $item->getId()) : null;
+        $extraLinks = $panel ? $megamenu->extraLinks($panel) : [];
+        $promo = $panel ? $megamenu->promoImageUrl($panel) : '';
+        // A panel shows when it has anything to show: subcategories, extra links or a promo.
+        if ($panel && !$hasChildren && !$extraLinks && $promo === '' && $panel['promo_heading'] === '') {
+            $panel = null;
+        }
+        $classes = ['level' . $level];
+        if ($hasChildren) {
+            $classes[] = 'parent';
+        }
+        if ($item->getIsCategory()) {
+            $classes[] = 'category-item';
+        }
+        if ($panel) {
+            $classes[] = 'has-mega-panel';
+        }
+        $classAttr = implode(' ', $classes);
+        ?>
+        <li class="<?= $escaper->escapeHtmlAttr($classAttr) ?>">
+            <a href="<?= $escaper->escapeUrl((string) $item->getUrl()) ?>">
+                <span><?= $escaper->escapeHtml($item->getName()) ?></span>
+            </a>
+            <?php if ($hasChildren || $panel) : ?>
+                <details class="menu-toggle">
+                    <summary class="menu-toggle-summary"
+                             aria-label="<?= $escaper->escapeHtmlAttr(__('Toggle %1 submenu', $item->getName())) ?>">
+                        <svg class="menu-toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                        </svg>
+                    </summary>
+                    <?php if ($panel) : ?>
+                        <div class="submenu mega-panel mega-panel-cols-<?= (int) $panel['columns'] ?>">
+                            <div class="mega-panel-columns">
+                                <?php foreach ($item->getChildren() as $child) : ?>
+                                    <div class="mega-panel-group">
+                                        <a class="mega-panel-heading" href="<?= $escaper->escapeUrl((string) $child->getUrl()) ?>"><?= $escaper->escapeHtml($child->getName()) ?></a>
+                                        <?php if ($panel['depth'] >= 2 && $child->hasChildren()) : ?>
+                                            <ul class="mega-panel-list">
+                                                <?php foreach ($child->getChildren() as $grandchild) : ?>
+                                                    <li><a href="<?= $escaper->escapeUrl((string) $grandchild->getUrl()) ?>"><?= $escaper->escapeHtml($grandchild->getName()) ?></a></li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endforeach; ?>
+                                <?php if ($extraLinks) : ?>
+                                    <div class="mega-panel-group mega-panel-extra">
+                                        <?php if ($panel['links_heading'] !== '') : ?>
+                                            <span class="mega-panel-heading"><?= $escaper->escapeHtml($panel['links_heading']) ?></span>
+                                        <?php endif; ?>
+                                        <ul class="mega-panel-list">
+                                            <?php foreach ($extraLinks as $link) : ?>
+                                                <li><a href="<?= $escaper->escapeUrl($link['url']) ?>"><?= $escaper->escapeHtml($link['label']) ?></a></li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <?php if ($promo !== '' || $panel['promo_heading'] !== '') : ?>
+                                <a class="mega-panel-promo" href="<?= $escaper->escapeUrl($megamenu->url($panel['promo_url']) ?: (string) $item->getUrl()) ?>">
+                                    <?php if ($promo !== '') : ?>
+                                        <img src="<?= $escaper->escapeUrl($promo) ?>" alt="" loading="lazy" width="600" height="400">
+                                    <?php endif; ?>
+                                    <?php if ($panel['promo_heading'] !== '') : ?>
+                                        <span class="mega-panel-promo-heading"><?= $escaper->escapeHtml($panel['promo_heading']) ?></span>
+                                    <?php endif; ?>
+                                    <?php if ($panel['promo_text'] !== '') : ?>
+                                        <span class="mega-panel-promo-text"><?= $escaper->escapeHtml($panel['promo_text']) ?></span>
+                                    <?php endif; ?>
+                                    <?php if ($panel['promo_button'] !== '') : ?>
+                                        <span class="mega-panel-promo-button btn btn-sm btn-neutral"><?= $escaper->escapeHtml($panel['promo_button']) ?></span>
+                                    <?php endif; ?>
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    <?php else : ?>
+                        <ul class="level<?= (int) ($level + 1) ?> submenu">
+                            <?php $renderMenuItems($item->getChildren(), $level + 1); ?>
+                        </ul>
+                    <?php endif; ?>
+                </details>
+            <?php endif; ?>
+        </li>
+        <?php
+    }
+};
+?>
+
+<nav class="navigation<?= $megamenu->isEnabled() ? ' has-mega-nav' : '' ?>" data-action="navigation">
+    <ul>
+        <?php foreach ($megamenu->links('before') as $link) : ?>
+            <?php $renderLink($link['label'], $link['url']); ?>
+        <?php endforeach; ?>
+        <?php $renderMenuItems($block->getMenu()->getChildren(), 0); ?>
+        <?php foreach ($megamenu->links('after') as $link) : ?>
+            <?php $renderLink($link['label'], $link['url']); ?>
+        <?php endforeach; ?>
+        <?= $block->getChildHtml() ?>
+    </ul>
+</nav>

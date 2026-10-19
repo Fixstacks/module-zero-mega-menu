@@ -1,0 +1,174 @@
+<?php
+/**
+ * Copyright © 2026 Roman Pasichnyk
+ * SPDX-License-Identifier: OSL-3.0 OR AFL-3.0
+ *
+ * The form of a department's panel (columns, subcategory levels, extra
+ * links, promo) or of a link of the menu's own.
+ *
+ * @var \Magento\Backend\Block\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+/** @var \Zero\MegaMenu\ViewModel\Admin $admin */
+$admin = $block->getData('view_model');
+$row = $admin->current();
+$categoryId = $admin->categoryId();
+$value = static fn (string $key, string $default = '') => (string) ($row[$key] ?? $default);
+?>
+<p><a href="<?= $escaper->escapeUrl($admin->url('zero_megamenu/menu/index')) ?>">&larr; <?= $escaper->escapeHtml(__('Mega Menu')) ?></a></p>
+<form class="zero-megamenu-form" method="post" enctype="multipart/form-data" action="<?= $escaper->escapeUrl($admin->url('zero_megamenu/menu/save')) ?>" data-megamenu-form>
+    <input type="hidden" name="form_key" value="<?= $escaper->escapeHtmlAttr($admin->formKey()) ?>">
+    <?php if ($row) : ?><input type="hidden" name="id" value="<?= (int) $row['menu_id'] ?>"><?php endif; ?>
+    <?php if ($categoryId) : ?>
+        <input type="hidden" name="category_id" value="<?= (int) $categoryId ?>">
+        <h2 class="admin__legend"><?= $escaper->escapeHtml(__('Panel of "%1"', $admin->categoryName($categoryId))) ?></h2>
+        <fieldset class="admin__fieldset">
+            <div class="admin__field">
+                <label class="admin__field-label" for="menu-store"><span><?= $escaper->escapeHtml(__('Store View')) ?></span></label>
+                <div class="admin__field-control">
+                    <select class="admin__control-select" id="menu-store" name="store_id">
+                        <option value="0"><?= $escaper->escapeHtml(__('All store views')) ?></option>
+                        <?php foreach ($admin->storeViews() as $storeId => $storeLabel) : ?>
+                            <option value="<?= (int) $storeId ?>"<?= (int) $value('store_id', '0') === $storeId ? ' selected' : '' ?>><?= $escaper->escapeHtml($storeLabel) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <div class="admin__field-note"><?= $escaper->escapeHtml(__('Texts are in one language: limit a panel or a link to the store view that speaks it.')) ?></div>
+                </div>
+            </div>
+            <div class="admin__field">
+                <label class="admin__field-label" for="menu-active"><span><?= $escaper->escapeHtml(__('Active')) ?></span></label>
+                <div class="admin__field-control">
+                    <input type="checkbox" class="admin__control-checkbox" id="menu-active" name="is_active" value="1"<?= !$row || $row['is_active'] ? ' checked' : '' ?>>
+                    <label class="admin__field-label" for="menu-active"></label>
+                </div>
+            </div>
+            <div class="admin__field">
+                <label class="admin__field-label" for="menu-mega"><span><?= $escaper->escapeHtml(__('Full-width panel')) ?></span></label>
+                <div class="admin__field-control">
+                    <input type="checkbox" class="admin__control-checkbox" id="menu-mega" name="is_mega" value="1"<?= !$row || $row['is_mega'] ? ' checked' : '' ?>>
+                    <label class="admin__field-label" for="menu-mega"></label>
+                    <div class="admin__field-note"><?= $escaper->escapeHtml(__('Off: the plain dropdown of subcategories.')) ?></div>
+                </div>
+            </div>
+            <div class="admin__field">
+                <label class="admin__field-label" for="menu-columns"><span><?= $escaper->escapeHtml(__('Columns')) ?></span></label>
+                <div class="admin__field-control">
+                    <select class="admin__control-select" id="menu-columns" name="columns">
+                        <?php foreach ([2, 3, 4] as $n) : ?>
+                            <option value="<?= (int) $n ?>"<?= (int) $value('columns', '3') === $n ? ' selected' : '' ?>><?= (int) $n ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <div class="admin__field-note"><?= $escaper->escapeHtml(__('Subcategories (and the extra links) flow into this many columns.')) ?></div>
+                </div>
+            </div>
+            <div class="admin__field">
+                <label class="admin__field-label" for="menu-depth"><span><?= $escaper->escapeHtml(__('Subcategory levels')) ?></span></label>
+                <div class="admin__field-control">
+                    <select class="admin__control-select" id="menu-depth" name="depth">
+                        <option value="1"<?= (int) $value('depth', '2') === 1 ? ' selected' : '' ?>><?= $escaper->escapeHtml(__('1: subcategories as headings')) ?></option>
+                        <option value="2"<?= (int) $value('depth', '2') === 2 ? ' selected' : '' ?>><?= $escaper->escapeHtml(__('2: headings with their subcategories under them')) ?></option>
+                    </select>
+                </div>
+            </div>
+            <div class="admin__field">
+                <label class="admin__field-label" for="menu-links-heading"><span><?= $escaper->escapeHtml(__('Extra links heading')) ?></span></label>
+                <div class="admin__field-control">
+                    <input class="admin__control-text" id="menu-links-heading" name="links_heading" value="<?= $escaper->escapeHtmlAttr($value('links_heading')) ?>">
+                </div>
+            </div>
+            <div class="admin__field">
+                <label class="admin__field-label" for="menu-links"><span><?= $escaper->escapeHtml(__('Extra links')) ?></span></label>
+                <div class="admin__field-control">
+                    <textarea class="admin__control-textarea" id="menu-links" name="links" rows="5" style="font-family: monospace;"><?= $escaper->escapeHtml($value('links')) ?></textarea>
+                    <div class="admin__field-note"><?= $escaper->escapeHtml(__('One per line: Label | URL. A URL without a scheme is a path on the store, e.g. "Size guide | size-guide".')) ?></div>
+                </div>
+            </div>
+        </fieldset>
+        <h3><?= $escaper->escapeHtml(__('Promo card')) ?></h3>
+        <fieldset class="admin__fieldset">
+            <div class="admin__field">
+                <label class="admin__field-label" for="menu-promo"><span><?= $escaper->escapeHtml(__('Picture')) ?></span></label>
+                <div class="admin__field-control">
+                    <?php if ($row && $row['promo_image'] !== '') : ?>
+                        <p><img src="<?= $escaper->escapeUrl($admin->promoUrl($row)) ?>" alt="" style="max-width: 240px; display: block; margin-bottom: 8px;">
+                            <label><input type="checkbox" name="remove_promo" value="1"> <?= $escaper->escapeHtml(__('Remove the picture')) ?></label></p>
+                    <?php endif; ?>
+                    <input type="file" id="menu-promo" name="promo" accept="image/*">
+                    <div class="admin__field-note"><?= $escaper->escapeHtml(__('JPEG, PNG, WebP or SVG, about 600 × 400.')) ?></div>
+                </div>
+            </div>
+            <div class="admin__field">
+                <label class="admin__field-label" for="menu-promo-heading"><span><?= $escaper->escapeHtml(__('Heading')) ?></span></label>
+                <div class="admin__field-control"><input class="admin__control-text" id="menu-promo-heading" name="promo_heading" value="<?= $escaper->escapeHtmlAttr($value('promo_heading')) ?>"></div>
+            </div>
+            <div class="admin__field">
+                <label class="admin__field-label" for="menu-promo-text"><span><?= $escaper->escapeHtml(__('Text')) ?></span></label>
+                <div class="admin__field-control"><textarea class="admin__control-textarea" id="menu-promo-text" name="promo_text" rows="2"><?= $escaper->escapeHtml($value('promo_text')) ?></textarea></div>
+            </div>
+            <div class="admin__field">
+                <label class="admin__field-label" for="menu-promo-url"><span><?= $escaper->escapeHtml(__('Link')) ?></span></label>
+                <div class="admin__field-control">
+                    <input class="admin__control-text" id="menu-promo-url" name="promo_url" value="<?= $escaper->escapeHtmlAttr($value('promo_url')) ?>">
+                    <div class="admin__field-note"><?= $escaper->escapeHtml(__('Empty: the department itself.')) ?></div>
+                </div>
+            </div>
+            <div class="admin__field">
+                <label class="admin__field-label" for="menu-promo-button"><span><?= $escaper->escapeHtml(__('Button text')) ?></span></label>
+                <div class="admin__field-control"><input class="admin__control-text" id="menu-promo-button" name="promo_button" value="<?= $escaper->escapeHtmlAttr($value('promo_button')) ?>"></div>
+            </div>
+        </fieldset>
+    <?php else : ?>
+        <h2 class="admin__legend"><?= $escaper->escapeHtml($row ? __('Edit Link') : __('New Link')) ?></h2>
+        <fieldset class="admin__fieldset">
+            <div class="admin__field">
+                <label class="admin__field-label" for="menu-store"><span><?= $escaper->escapeHtml(__('Store View')) ?></span></label>
+                <div class="admin__field-control">
+                    <select class="admin__control-select" id="menu-store" name="store_id">
+                        <option value="0"><?= $escaper->escapeHtml(__('All store views')) ?></option>
+                        <?php foreach ($admin->storeViews() as $storeId => $storeLabel) : ?>
+                            <option value="<?= (int) $storeId ?>"<?= (int) $value('store_id', '0') === $storeId ? ' selected' : '' ?>><?= $escaper->escapeHtml($storeLabel) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <div class="admin__field-note"><?= $escaper->escapeHtml(__('Texts are in one language: limit a panel or a link to the store view that speaks it.')) ?></div>
+                </div>
+            </div>
+            <div class="admin__field _required">
+                <label class="admin__field-label" for="menu-label"><span><?= $escaper->escapeHtml(__('Label')) ?></span></label>
+                <div class="admin__field-control"><input class="admin__control-text" id="menu-label" name="label" required value="<?= $escaper->escapeHtmlAttr($value('label')) ?>"></div>
+            </div>
+            <div class="admin__field _required">
+                <label class="admin__field-label" for="menu-url"><span><?= $escaper->escapeHtml(__('URL')) ?></span></label>
+                <div class="admin__field-control">
+                    <input class="admin__control-text" id="menu-url" name="url" required value="<?= $escaper->escapeHtmlAttr($value('url')) ?>">
+                    <div class="admin__field-note"><?= $escaper->escapeHtml(__('A full URL, or a path on the store: "blog", "brands", "about-us".')) ?></div>
+                </div>
+            </div>
+            <div class="admin__field">
+                <label class="admin__field-label" for="menu-placement"><span><?= $escaper->escapeHtml(__('Placement')) ?></span></label>
+                <div class="admin__field-control">
+                    <select class="admin__control-select" id="menu-placement" name="placement">
+                        <option value="after"<?= $value('placement', 'after') === 'after' ? ' selected' : '' ?>><?= $escaper->escapeHtml(__('After the categories')) ?></option>
+                        <option value="before"<?= $value('placement') === 'before' ? ' selected' : '' ?>><?= $escaper->escapeHtml(__('Before the categories')) ?></option>
+                    </select>
+                </div>
+            </div>
+            <div class="admin__field">
+                <label class="admin__field-label" for="menu-position"><span><?= $escaper->escapeHtml(__('Position')) ?></span></label>
+                <div class="admin__field-control"><input class="admin__control-text" type="number" min="0" id="menu-position" name="position" value="<?= (int) $value('position', '0') ?>" style="width: 80px;"></div>
+            </div>
+            <div class="admin__field">
+                <label class="admin__field-label" for="menu-active"><span><?= $escaper->escapeHtml(__('Active')) ?></span></label>
+                <div class="admin__field-control">
+                    <input type="checkbox" class="admin__control-checkbox" id="menu-active" name="is_active" value="1"<?= !$row || $row['is_active'] ? ' checked' : '' ?>>
+                    <label class="admin__field-label" for="menu-active"></label>
+                </div>
+            </div>
+        </fieldset>
+    <?php endif; ?>
+    <div class="admin__field" style="display: flex; gap: 10px; margin-top: 20px;">
+        <button type="submit" class="action-primary"><?= $escaper->escapeHtml(__('Save')) ?></button>
+        <?php if ($row) : ?>
+            <button type="submit" name="delete" value="1" class="action-secondary"><?= $escaper->escapeHtml($categoryId ? __('Remove the Panel') : __('Delete the Link')) ?></button>
+        <?php endif; ?>
+    </div>
+</form>
