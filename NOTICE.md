@@ -1,4 +1,4 @@
-# fixstacks/module-zero-mega-menu — licensing
+# zerofront/module-zero-mega-menu — licensing
 
 Copyright © 2026 Roman Pasichnyk.
 
